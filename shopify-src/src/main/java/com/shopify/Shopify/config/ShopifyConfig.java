@@ -3,11 +3,6 @@ package com.shopify.Shopify.config;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.config.http.SessionCreationPolicy;
 
 /**
  * Generic Configuration class
@@ -17,9 +12,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
  * @since 7 Jan 2022
  */
 @Configuration
-@EnableWebSecurity
-@EnableGlobalMethodSecurity(securedEnabled = true, prePostEnabled = true)
-public class ShopifyConfig extends WebSecurityConfigurerAdapter {
+public class ShopifyConfig {
 
     /**
      * Create bean for Model Mapper
@@ -41,12 +34,12 @@ public class ShopifyConfig extends WebSecurityConfigurerAdapter {
      * @author Rohan
      * @since 7 Jan 2022
      */
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http.cors().and().authorizeRequests()
-                .antMatchers("/webjars/**", "/swagger-resources/**").permitAll()
-                .antMatchers("/api/items/**")
-                .permitAll().anyRequest().authenticated().and().csrf().disable();
-        http.headers().frameOptions().sameOrigin();
-    }
+//    @Override
+//    protected void configure(HttpSecurity http) throws Exception {
+//        http.cors().and().authorizeRequests()
+//                .antMatchers("/webjars/**", "/swagger-resources/**").permitAll()
+//                .antMatchers("/api/items/**")
+//                .permitAll().anyRequest().authenticated().and().csrf().disable();
+//        http.headers().frameOptions().sameOrigin();
+//    }
 }

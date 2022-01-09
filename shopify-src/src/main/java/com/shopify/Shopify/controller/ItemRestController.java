@@ -6,6 +6,7 @@ import com.shopify.Shopify.dto.requestmapper.ItemDto;
 import com.shopify.Shopify.dto.responsemapper.ApiResponse;
 import com.shopify.Shopify.enums.Type;
 import com.shopify.Shopify.model.BusinessException;
+import com.shopify.Shopify.model.DeleteInfo;
 import com.shopify.Shopify.model.Item;
 import com.shopify.Shopify.service.BusinessExceptionService;
 import com.shopify.Shopify.service.ItemService;
@@ -29,6 +30,7 @@ import java.util.stream.Collectors;
  * @since 7 Jan 2022
  */
 @RestController
+@CrossOrigin(origins = "http://localhost:3000/")
 @RequestMapping("/api/items")
 public class ItemRestController {
 
@@ -67,6 +69,31 @@ public class ItemRestController {
             return ResponseBuilder.createGeneralPostResponse(Type.FAILURE, null, ResponseMessageConstant.ITEMS_SAVED_FAILURE);
         }
         return ResponseBuilder.createGeneralPostResponse(Type.SUCCESS, ResponseMessageConstant.ITEMS_SAVED, null);
+    }
+
+    /**
+     * Method forward request to service to save or update object
+     *
+     * @param id object
+     * @return response
+     * @author Rohan
+     * @since 7 Jan 2022
+     */
+    @GetMapping("/undelete")
+    public ApiResponse undelete(@RequestParam String id) {
+        try {
+            if(itemService.undelete(id))
+                return ResponseBuilder.createGeneralPostResponse(Type.SUCCESS, ResponseMessageConstant.ITEMS_RESTORED, null);
+        } catch (Exception exception) {
+            BusinessException businessException = new BusinessException();
+            businessException.setMessage(exception.getMessage());
+            businessException.setStackTraceText(ExceptionUtils.getStackTrace(exception));
+            businessException.setOccurrenceTime(LocalDateTime.now());
+            businessException.setModuleName(CommonConstant.MODULE_NAME);
+            businessExceptionService.save(businessException);
+            return ResponseBuilder.createGeneralPostResponse(Type.FAILURE, null, ResponseMessageConstant.SOMETHING_WENT_WRONG);
+        }
+        return ResponseBuilder.createGeneralPostResponse(Type.FAILURE, null, ResponseMessageConstant.SOMETHING_WENT_WRONG);
     }
 
     /**
@@ -124,15 +151,15 @@ public class ItemRestController {
     /**
      * Method Dispatch request to delete object by Id
      *
-     * @param itemId identifier
+     * @param deleteInfo identifier
      * @return object
      * @author Rohan
      * @since 7 Jan 2022
      */
     @PostMapping("/delete")
-    public ApiResponse deleteById(String itemId) {
+    public ApiResponse deleteById(@RequestBody @Valid DeleteInfo deleteInfo) {
         try {
-            boolean deleted = itemService.deleteById(itemId);
+            boolean deleted = itemService.deleteById(deleteInfo);
             if(deleted)
                 return itemDtoResponseBuilder.createGeneralPostResponse(Type.SUCCESS, ResponseMessageConstant.ITEMS_DELETED_SUCCESSFULLY, null);
             return itemDtoResponseBuilder.createGeneralPostResponse(Type.FAILURE, null, ResponseMessageConstant.ITEM_DOES_NOT_EXIST);

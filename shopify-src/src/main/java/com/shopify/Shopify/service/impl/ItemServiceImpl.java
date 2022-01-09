@@ -1,6 +1,7 @@
 package com.shopify.Shopify.service.impl;
 
 import com.shopify.Shopify.enums.ShopifyEnum;
+import com.shopify.Shopify.model.DeleteInfo;
 import com.shopify.Shopify.model.Item;
 import com.shopify.Shopify.repository.ItemRepository;
 import com.shopify.Shopify.service.ItemService;
@@ -85,11 +86,12 @@ public class ItemServiceImpl implements ItemService {
      * @since 7 Jan 2022
      */
     @Override
-    public boolean deleteById(String id) {
-        Item item = getById(id);
+    public boolean deleteById(DeleteInfo deleteInfo) {
+        Item item = getById(deleteInfo.getId());
         if(null == item){
             return false;
         } else{
+            item.setDeleteComment(deleteInfo.getDeleteComment());
             item.setDeleted(true);
             item.setModifiedDate(System.currentTimeMillis());
             itemRepository.save(item);
@@ -108,6 +110,26 @@ public class ItemServiceImpl implements ItemService {
         Query query = new Query();
         query.addCriteria(Criteria.where(ShopifyEnum.DELETED.getIdName()).is(true));
         return mongoTemplate.find(query, Item.class);
+    }
+
+/**
+     * Method to get undelete an item
+     *
+     * @author Rohan
+     * @since 8 Jan 2022
+     */
+    @Override
+    public boolean undelete(String id) {
+        Item item = itemRepository.findById(id).orElse(null);
+        if(null == item){
+            return false;
+        } else{
+            item.setDeleteComment(null);
+            item.setDeleted(false);
+            item.setModifiedDate(System.currentTimeMillis());
+            itemRepository.save(item);
+        }
+        return true;
     }
 
     /**

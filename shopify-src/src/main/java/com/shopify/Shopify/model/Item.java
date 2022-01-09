@@ -40,6 +40,7 @@ public class Item {
 
     private boolean deleted;
     private String description;
+    private String deleteComment;
     private Long createdDate;
     private Long modifiedDate;
 

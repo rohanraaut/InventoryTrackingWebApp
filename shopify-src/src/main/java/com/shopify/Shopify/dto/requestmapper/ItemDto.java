@@ -32,6 +32,6 @@ public class ItemDto {
     @NotNull
     @Size(min = 1)
     private String category;
-
+    private String deleteComment;
     private String description;
 }
