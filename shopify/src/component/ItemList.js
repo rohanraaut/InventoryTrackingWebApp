@@ -3,13 +3,16 @@ import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { BASE_URL } from "../const/Constants";
 import AddInventoryItem from "./AddInventoryItem";
+import DeletedItemList from "./DeletedItemList";
 
 export default function ItemList(props) {
 
     const [tableData, setTableData] = useState([]);
     const [selectedItem, setSelectedItem] = useState({});
     const [hidden, setHidden] = useState(true);
-    const {register, handleSubmit, reset} = useForm();
+    const { register, handleSubmit, reset } = useForm();
+    const [comment, setComment] = useState();
+    const [deleted, setDeleted] = useState(false);
 
     useEffect(() => {
         getAll();
@@ -43,7 +46,32 @@ export default function ItemList(props) {
 
     const handleDelete = id => {
         setHidden(false);
+        if (comment) {
+            let deleteData = { id: id, deleteComment: comment }
+            axios.post(BASE_URL + "/delete", deleteData)
+                .then(response => {
+                    setHidden(true);
+                    setComment("");
+                    getAll();
+                    setDeleted(true);
+                })
+                .catch(err => { console.log(err) });
+        }
         console.log(id);
+    }
+
+    const handleCommentChange = e => {
+        setComment(e.target.value);
+    }
+
+    const handleDeleteFlagChange = flag => {
+        setDeleted(flag);
+    }
+
+    const handleUndeleteFlag = (flag) => {
+        if (flag) {
+            getAll();
+        }
     }
 
     return <>
@@ -51,8 +79,9 @@ export default function ItemList(props) {
         <AddInventoryItem flag={handleFlagChange} data={selectedItem} />
         <hr />
         <div hidden={hidden}>
-            Please enter deletion comment<input type="text"></input>
+            Please enter deletion comment: <input type="text" onChange={handleCommentChange}></input>
         </div>
+        <h3> List of Added Inventory List </h3>
         <table>
             <thead>
                 <tr>
@@ -80,5 +109,6 @@ export default function ItemList(props) {
                 })}
             </tbody>
         </table>
+        <DeletedItemList isUndeleted={handleUndeleteFlag} deleted={deleted} deleteFlag={handleDeleteFlagChange} />
     </>
 }
